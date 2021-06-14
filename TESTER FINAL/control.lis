@@ -1,0 +1,163 @@
+     1                                  ; // Author information
+     2                                  ; //  Author name: Stefan Parrish
+     3                                  ; //  Author email: parrishstefan@fullerton.edu
+     4                                  ; //  ENROLLED IN SECTION 07
+     5                                  ; //  TOOK TEST FROM SECTION 1&5
+     6                                  
+     7                                  extern printf
+     8                                  extern scanf
+     9                                  extern fill
+    10                                  extern displayArray
+    11                                  extern harmonic
+    12                                  
+    13                                  array_size equ 100                        ; Set capacity limit of array.
+    14                                  
+    15                                  global control                          ; Make function callable from other linked files.
+    16                                  
+    17                                  section .data
+    18 00000000 456E74657220666C6F-         instructions db "Enter float numbers separated by white space.  Invalid inputs will be omitted.", 10, 0
+    18 00000009 6174206E756D626572-
+    18 00000012 732073657061726174-
+    18 0000001B 656420627920776869-
+    18 00000024 74652073706163652E-
+    18 0000002D 2020496E76616C6964-
+    18 00000036 20696E707574732077-
+    18 0000003F 696C6C206265206F6D-
+    18 00000048 69747465642E0A00   
+    19 00000050 456E74657220636F6E-         instructions2 db "Enter control+D to terminate.",10,0
+    19 00000059 74726F6C2B4420746F-
+    19 00000062 207465726D696E6174-
+    19 0000006B 652E0A00           
+    20                                  
+    21 0000006F 5468616E6B20796F75-         enteredPrompt db "Thank you.  You entered",10,0
+    21 00000078 2E2020596F7520656E-
+    21 00000081 74657265640A00     
+    22                                  
+    23 00000088 546865206861726D6F-         harmonicPrompt db "The harmonic mean will be returned to the driver.",10,0
+    23 00000091 6E6963206D65616E20-
+    23 0000009A 77696C6C2062652072-
+    23 000000A3 657475726E65642074-
+    23 000000AC 6F2074686520647269-
+    23 000000B5 7665722E0A00       
+    24                                  
+    25 000000BB 256C6400                    floatFormat db "%ld", 0 
+    26 000000BF 256C660A00                  outputDbl   db "%lf", 10, 0
+    27                                  
+    28                                  section .bss
+    29 00000000 <res 00000320>              floatArray: resq 100                  ; Reserve space for uninitialized array based on array_size above.
+    30                                  
+    31                                  section .text
+    32                                  
+    33                                  control:
+    34                                  
+    35                                  ; Back up all registers and set stack pointer to base pointer
+    36 00000000 55                      push rbp
+    37 00000001 4889E5                  mov rbp, rsp
+    38 00000004 57                      push rdi
+    39 00000005 56                      push rsi
+    40 00000006 52                      push rdx
+    41 00000007 51                      push rcx
+    42 00000008 4150                    push r8
+    43 0000000A 4151                    push r9
+    44 0000000C 4152                    push r10
+    45 0000000E 4153                    push r11
+    46 00000010 4154                    push r12
+    47 00000012 4155                    push r13
+    48 00000014 4156                    push r14
+    49 00000016 4157                    push r15
+    50 00000018 53                      push rbx
+    51 00000019 9C                      pushf
+    52                                  
+    53 0000001A 6A00                    push qword 0                            ; Extra push to create even number of pushes
+    54                                  
+    55                                  ;-------------------------------INSTRUCTION PROMPT------------------------------------------
+    56                                  
+    57 0000001C 6A00                    push qword 0
+    58 0000001E B800000000              mov rax, 0                    
+    59 00000023 48BF-                   mov rdi, instructions
+    59 00000025 [0000000000000000] 
+    60 0000002D E8(00000000)            call printf                             ; Print out intructions prompt.
+    61 00000032 58                      pop rax
+    62                                  
+    63 00000033 6A00                    push qword 0
+    64 00000035 B800000000              mov rax, 0                    
+    65 0000003A 48BF-                   mov rdi, instructions2
+    65 0000003C [5000000000000000] 
+    66 00000044 E8(00000000)            call printf                             ; Print out intructions2 prompt.
+    67 00000049 58                      pop rax
+    68                                  
+    69                                  ;---------------------------CALL FUNCTION INPUT_ARRAY---------------------------------------
+    70                                  
+    71 0000004A 48BF-                   mov rdi, floatArray                     ; Pass array into rdi register.
+    71 0000004C [0000000000000000] 
+    72 00000054 BE64000000              mov rsi, array_size                     ; Pass the max array size into rsi register.
+    73 00000059 E8(00000000)            call fill                               ; Call funtion to input array.
+    74 0000005E 4989C6                  mov r14, rax                            ; Put number of elements in array in r14.
+    75                                  
+    76                                  ;-------------------------CONFIRM INPUTTED VALUES--------------------------------
+    77                                  
+    78                                  ;{ Print numbers entered prompt.
+    79 00000061 6A00                    push qword 0
+    80 00000063 B800000000              mov rax, 0
+    81 00000068 48BF-                   mov rdi, enteredPrompt
+    81 0000006A [6F00000000000000] 
+    82 00000072 E8(00000000)            call printf
+    83 00000077 58                      pop rax
+    84                                  ;}
+    85                                  
+    86 00000078 49BF-                   mov r15, floatArray                     ; Put array into r15.
+    86 0000007A [0000000000000000] 
+    87 00000082 41BD00000000            mov r13, 0                              ; Counter to iterate through array.
+    88                                  
+    89                                  ;----------------------------DISPLAY ELEMENTS OF ARRAY--------------------------------------
+    90                                  ; Calls display_array that prints out each integer in the array seperated by 1 space.
+    91                                  
+    92 00000088 6A00                    push qword 0
+    93 0000008A 48BF-                   mov qword rdi, floatArray               ; Pass the array as first parameter.
+    93 0000008C [0000000000000000] 
+    94 00000094 4C89F6                  mov qword rsi, r14                      ; Pass # of elements in the array stored in r14.
+    95 00000097 E8(00000000)            call displayArray                       ; Call display_array function.
+    96 0000009C 58                      pop rax
+    97                                  
+    98                                  ;-----------------------------------CALLS SUM-----------------------------------------------
+    99                                  ; Calls function sum to return the sum of integers in the array
+   100                                  
+   101 0000009D 6A00                    push qword 0
+   102 0000009F 48BF-                   mov qword rdi, floatArray               ; Pass the array as first parameter.  
+   102 000000A1 [0000000000000000] 
+   103 000000A9 4C89F6                  mov qword rsi, r14                      ; Pass # of elements in the array stored in r14.
+   104                                  ;mov qword rax, 0
+   105 000000AC E8(00000000)            call harmonic                                ; Function sum to add all the integers in array. 
+   106 000000B1 F2440F10D8              movsd xmm11, xmm0
+   107 000000B6 58                      pop rax
+   108                                  
+   109                                  ;---------------------------------PRINTS OUT SUMPROMPT-------------------------------------- 
+   110 000000B7 B800000000              mov rax, 0                    
+   111 000000BC 48BF-                   mov rdi, harmonicPrompt
+   111 000000BE [8800000000000000] 
+   112 000000C6 E8(00000000)            call printf                            
+   113                                  
+   114                                  
+   115                                  ;---------------------------------END OF FILE-----------------------------------------------
+   116                                  exit:
+   117                                  
+   118                                  ; Restore all registers to their original state.
+   119 000000CB 58                      pop rax                                 ; Remove extra push from stack.
+   120 000000CC F2410F10C3              movsd xmm0, xmm11                       ; Return sum.
+   121 000000D1 9D                      popf                                                 
+   122 000000D2 5B                      pop rbx                                                     
+   123 000000D3 415F                    pop r15                                                     
+   124 000000D5 415E                    pop r14                                                      
+   125 000000D7 415D                    pop r13                                                      
+   126 000000D9 415C                    pop r12                                                      
+   127 000000DB 415B                    pop r11                                                     
+   128 000000DD 415A                    pop r10                                                     
+   129 000000DF 4159                    pop r9                                                      
+   130 000000E1 4158                    pop r8                                                      
+   131 000000E3 59                      pop rcx                                                     
+   132 000000E4 5A                      pop rdx                                                     
+   133 000000E5 5E                      pop rsi                                                     
+   134 000000E6 5F                      pop rdi                                                     
+   135 000000E7 5D                      pop rbp
+   136                                  
+   137 000000E8 C3                      ret

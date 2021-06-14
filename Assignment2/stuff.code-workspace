@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "Floating IO"
+		},
+		{
+			"path": "Assignment 2"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"iostream": "cpp"
+		}
+	}
+}

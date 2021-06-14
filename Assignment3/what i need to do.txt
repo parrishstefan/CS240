@@ -1,0 +1,7 @@
+change %ld to %lf
+-ld is for intergers we need floats
+
+
+in sum we need to do xmm addition not r
+
+fix input

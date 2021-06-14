@@ -1,0 +1,354 @@
+     1                                  ; *****************************************************************************************************************************
+     2                                  ; Program name: "Quadratic Formula".  This program takes 3 inputs from the user (a,b,c). The program will then decide if the  *
+     3                                  ; values are valid float inputs, if they are valid the program will calculate the roots of the function for quadratic formula *
+     4                                  ;  Copyright (C) 2021 Stefan Parrish.                                                                                        *
+     5                                  ;                                                                                                                            *
+     6                                  ; This file is part of the software program "Quadratic Formula".                                                         *
+     7                                  ; Perimeter of Rectangle is free software: you can redistribute it and/or modify it under the terms of the                    *
+     8                                  ; GNU General Public License version 3 as published by the Free Software Foundation.                                          *
+     9                                  ; Perimeter of Rectangle is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied*
+    10                                  ; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.      *
+    11                                  ; A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                             *
+    12                                  ; *****************************************************************************************************************************
+    13                                  
+    14                                  ; ========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    15                                  
+    16                                  ; Author information
+    17                                  ;  Author name: Stefan Parrish
+    18                                  ;  Author email: parrishstefan@fullerton.edu
+    19                                  
+    20                                  ; Program information
+    21                                  ;  Program name: Quadratic Formula
+    22                                  ;  Programming languages: Three Modules in C++ and ne modules in C and one module in X86
+    23                                  ;  Date program began: 2021-Feb-20
+    24                                  ;  Date of last update: 2021-Feb-28
+    25                                  ;  Date of reorganization of comments: 2021-Feb-28
+    26                                  ;  Files in this program: quadratic.asm, second_degree.c, isfloat.cpp, quadlibrary.cpp
+    27                                  ;  Status: Finished.  The program was tested extensively with no errors in Ubuntu20.04.
+    28                                  
+    29                                  ; This file
+    30                                  ;   File name: quadratic.asm
+    31                                  ;   Language: X86 with Intel syntax.
+    32                                  ;   Max page width: 132 columns
+    33                                  ;   Assemble: nasm -f elf64 -l assignment1.lis -o assignment1.o assignment1.asm
+    34                                  
+    35                                  
+    36                                  ;===== Begin code area ================================================================================================
+    37                                  extern printf
+    38                                  extern scanf
+    39                                  global quadratic
+    40                                  
+    41                                  ;isfloat.cpp
+    42                                  extern isfloat
+    43                                  extern stringtofloat
+    44                                  
+    45                                  extern quadraticCalc
+    46                                  
+    47                                  segment .data
+    48                                  
+    49 00000000 546869732070726F67-     welcome db "This program will find the roots of any quadratic equation.",10,0
+    49 00000009 72616D2077696C6C20-
+    49 00000012 66696E642074686520-
+    49 0000001B 726F6F7473206F6620-
+    49 00000024 616E79207175616472-
+    49 0000002D 617469632065717561-
+    49 00000036 74696F6E2E0A00     
+    50                                  
+    51                                  ;Prompt for user to input a, b, c for calculations
+    52 0000003D 506C6561736520656E-     inputfloatingpoints db "Please enter the three floating point coefficients of a quadratic equation in the order a, b, c separated by the end of line character. ",10,0
+    52 00000046 746572207468652074-
+    52 0000004F 6872656520666C6F61-
+    52 00000058 74696E6720706F696E-
+    52 00000061 7420636F6566666963-
+    52 0000006A 69656E7473206F6620-
+    52 00000073 612071756164726174-
+    52 0000007C 696320657175617469-
+    52 00000085 6F6E20696E20746865-
+    52 0000008E 206F7264657220612C-
+    52 00000097 20622C206320736570-
+    52 000000A0 617261746564206279-
+    52 000000A9 2074686520656E6420-
+    52 000000B2 6F66206C696E652063-
+    52 000000BB 68617261637465722E-
+    52 000000C4 200A00             
+    53                                  
+    54                                  ;End program output
+    55 000000C7 4F6E65206F66207468-     good_bye db "One of these roots will be returned to the caller function.",10,0
+    55 000000D0 65736520726F6F7473-
+    55 000000D9 2077696C6C20626520-
+    55 000000E2 72657475726E656420-
+    55 000000EB 746F20746865206361-
+    55 000000F4 6C6C65722066756E63-
+    55 000000FD 74696F6E2E0A00     
+    56                                  
+    57                                  ;User inputted incorrectly formatted floats
+    58 00000104 54686973206973206E-     inputwrong db "This is not a quadratic equation. You may run this program again.",10,0
+    58 0000010D 6F7420612071756164-
+    58 00000116 726174696320657175-
+    58 0000011F 6174696F6E2E20596F-
+    58 00000128 75206D61792072756E-
+    58 00000131 20746869732070726F-
+    58 0000013A 6772616D2061676169-
+    58 00000143 6E2E0A00           
+    59                                  ;User inputted correct formatted floats
+    60 00000147 5468616E6B20796F75-     inputright db "Thank you. The equation is %sx^2 + %sx + %s = 0.0",10,0
+    60 00000150 2E2054686520657175-
+    60 00000159 6174696F6E20697320-
+    60 00000162 2573785E32202B2025-
+    60 0000016B 7378202B202573203D-
+    60 00000174 20302E300A00       
+    61                                  
+    62                                  ;Format for three strings given by user (needs to be in float format)
+    63 0000017A 25732573257300          three_string_format db "%s%s%s",0
+    64                                  
+    65                                  ;Testing purposes only
+    66                                  ; testerFloat db "TEST ROOT: %5.3lf",10,0
+    67                                  ; testerInt db "TEST Int: %d",10,0
+    68                                  ; testerThreeInt db "TEST 3 Int: %d %d %d",10,0
+    69                                  ; testerThreeFloat db "TEST 3 FLOAT: %lf %lf %lf",10,0
+    70                                  
+    71                                  segment .bss  ;Reserved for uninitialized data
+    72                                  
+    73                                  ;Value holders for inputs by user
+    74 00000000 <res 00000020>          quadratic.stringa resb 32
+    75 00000020 <res 00000020>          quadratic.stringb resb 32
+    76 00000040 <res 00000020>          quadratic.stringc resb 32
+    77                                  
+    78                                  segment .text ;Reserved for executing instructions.
+    79                                  
+    80                                  quadratic:
+    81                                  
+    82                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    83                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified.
+    84 00000000 55                      push rbp
+    85 00000001 4889E5                  mov  rbp,rsp
+    86 00000004 57                      push rdi                                                    ;Backup rdi
+    87 00000005 56                      push rsi                                                    ;Backup rsi
+    88 00000006 52                      push rdx                                                    ;Backup rdx
+    89 00000007 51                      push rcx                                                    ;Backup rcx
+    90 00000008 4150                    push r8                                                     ;Backup r8
+    91 0000000A 4151                    push r9                                                     ;Backup r9
+    92 0000000C 4152                    push r10                                                    ;Backup r10
+    93 0000000E 4153                    push r11                                                    ;Backup r11
+    94 00000010 4154                    push r12                                                    ;Backup r12
+    95 00000012 4155                    push r13                                                    ;Backup r13
+    96 00000014 4156                    push r14                                                    ;Backup r14
+    97 00000016 4157                    push r15                                                    ;Backup r15
+    98 00000018 53                      push rbx                                                    ;Backup rbx
+    99 00000019 9C                      pushf                                                       ;Backup rflags
+   100                                  
+   101                                  
+   102                                  ;Registers rax, rip, and rsp are usually not backed up.
+   103 0000001A 6A00                    push qword 0
+   104                                  
+   105                                  
+   106                                  ;Display a welcome message to the viewer.
+   107 0000001C B800000000              mov rax, 0                    
+   108 00000021 48BF-                   mov rdi, welcome
+   108 00000023 [0000000000000000] 
+   109 0000002B E8(00000000)            call printf
+   110                                  
+   111                                  ;============= Begin section to input two float numbers using one call to scanf =======================================
+   112                                  ;Display a prompt message asking for inputs
+   113                                  
+   114                                  ;Display a prompt message asking for input for three floating point coefficients for quadratic equation
+   115 00000030 6A00                    push qword 0
+   116 00000032 B800000000              mov rax, 0
+   117 00000037 48BF-                   mov rdi, inputfloatingpoints
+   117 00000039 [3D00000000000000] 
+   118 00000041 E8(00000000)            call printf
+   119 00000046 58                      pop rax
+   120                                  
+   121                                  ;Inputs values into three variables for later use
+   122 00000047 6A63                    push qword 99
+   123 00000049 6AFF                    push qword -1
+   124 0000004B 6AFE                    push qword -2
+   125 0000004D B800000000              mov rax, 0
+   126 00000052 48BF-                   mov rdi, three_string_format
+   126 00000054 [7A01000000000000] 
+   127 0000005C 48BE-                   mov rsi, quadratic.stringa
+   127 0000005E [0000000000000000] 
+   128 00000066 48BA-                   mov rdx, quadratic.stringb
+   128 00000068 [2000000000000000] 
+   129 00000070 48B9-                   mov rcx, quadratic.stringc
+   129 00000072 [4000000000000000] 
+   130 0000007A E8(00000000)            call scanf
+   131 0000007F 58                      pop rax
+   132 00000080 58                      pop rax
+   133 00000081 58                      pop rax
+   134                                  
+   135                                  ; Outputs three strings
+   136                                  ; mov rax, 1
+   137                                  ; mov rdi, three_string_format
+   138                                  ; mov rsi, quadratic.stringa
+   139                                  ; mov rdx, quadratic.stringb
+   140                                  ; mov rcx, quadratic.stringc
+   141                                  ; call printf
+   142                                  ; pop rax
+   143                                  
+   144                                  ;Checks if the input values from user are in valid float format x.x
+   145 00000082 B800000000              mov rax, 0
+   146 00000087 48BF-                   mov rdi, quadratic.stringa
+   146 00000089 [0000000000000000] 
+   147 00000091 E8(00000000)            call isfloat
+   148 00000096 4989C6                  mov r14, rax
+   149                                  
+   150                                  ; mov rax, 0
+   151                                  ; mov rdi, testerInt
+   152                                  ; mov rsi, r14
+   153                                  ; call printf
+   154                                  
+   155 00000099 B800000000              mov rax, 0
+   156 0000009E 48BF-                   mov rdi, quadratic.stringb
+   156 000000A0 [2000000000000000] 
+   157 000000A8 E8(00000000)            call isfloat
+   158 000000AD 4989C5                  mov r13, rax
+   159                                  
+   160                                  ; mov rax, 0
+   161                                  ; mov rdi, testerInt
+   162                                  ; mov rsi, r13
+   163                                  ; call printf
+   164                                  
+   165 000000B0 B800000000              mov rax, 0
+   166 000000B5 48BF-                   mov rdi, quadratic.stringc
+   166 000000B7 [4000000000000000] 
+   167 000000BF E8(00000000)            call isfloat
+   168 000000C4 4989C4                  mov r12, rax
+   169                                  
+   170                                  ; mov rax, 0
+   171                                  ; mov rdi, testerInt
+   172                                  ; mov rsi, r12
+   173                                  ; call printf
+   174                                  
+   175                                  ;Outputs three Ints for booleans
+   176                                  ; push qword 99
+   177                                  ; mov rax, 0
+   178                                  ; mov rdi, testerThreeInt
+   179                                  ; mov rsi, r14
+   180                                  ; mov rdx, r13
+   181                                  ; mov rcx, r12
+   182                                  ; call printf
+   183                                  ; pop rax
+   184                                  
+   185 000000C7 4D01F5                  add r13, r14
+   186 000000CA 4D01E5                  add r13, r12
+   187 000000CD 41BA02000000            mov r10, 2
+   188                                  
+   189                                  ;r13 >  2 -> True
+   190                                  ;Else false
+   191 000000D3 4D39EA                  cmp r10, r13
+   192 000000D6 7C02                    jl FloatTrue
+   193 000000D8 EB37                    jmp FloatFalse
+   194                                  
+   195                                  FloatTrue:
+   196                                  ;If the values are floats then output to user correct inputs
+   197 000000DA 6A63                    push qword 99
+   198 000000DC B801000000              mov rax, 1
+   199 000000E1 48BF-                   mov rdi, inputright
+   199 000000E3 [4701000000000000] 
+   200 000000EB 48BE-                   mov rsi, quadratic.stringa
+   200 000000ED [0000000000000000] 
+   201 000000F5 48BA-                   mov rdx, quadratic.stringb
+   201 000000F7 [2000000000000000] 
+   202 000000FF 48B9-                   mov rcx, quadratic.stringc
+   202 00000101 [4000000000000000] 
+   203 00000109 E8(00000000)            call printf
+   204 0000010E 58                      pop rax
+   205 0000010F EB17                    jmp ConvertToFloat
+   206                                  
+   207                                  FloatFalse:
+   208                                  ;If the values are NOT floats then output to user incorrect inputs and end program
+   209 00000111 B800000000              mov rax, 0
+   210 00000116 48BF-                   mov rdi, inputwrong
+   210 00000118 [0401000000000000] 
+   211 00000120 E8(00000000)            call printf
+   212 00000125 58                      pop rax
+   213 00000126 EB72                    jmp GoodBye
+   214                                  
+   215                                  ConvertToFloat:
+   216                                  ;Convets input by user(string) to float
+   217 00000128 B800000000              mov rax, 0
+   218 0000012D 48BF-                   mov rdi, quadratic.stringa
+   218 0000012F [0000000000000000] 
+   219 00000137 E8(00000000)            call stringtofloat
+   220 0000013C 664C0F6EE8              movq xmm13, rax
+   221                                  
+   222 00000141 B800000000              mov rax, 0
+   223 00000146 48BF-                   mov rdi, quadratic.stringb
+   223 00000148 [2000000000000000] 
+   224 00000150 E8(00000000)            call stringtofloat
+   225 00000155 664C0F6EE0              movq xmm12, rax
+   226                                  
+   227 0000015A B800000000              mov rax, 0
+   228 0000015F 48BF-                   mov rdi, quadratic.stringc
+   228 00000161 [4000000000000000] 
+   229 00000169 E8(00000000)            call stringtofloat
+   230 0000016E 664C0F6ED8              movq xmm11, rax
+   231                                  
+   232                                  ; push qword 99
+   233                                  ; mov rax, 3
+   234                                  ; mov rdi, testerThreeFloat
+   235                                  ; movsd xmm0, xmm13
+   236                                  ; movsd xmm1, xmm12
+   237                                  ; movsd xmm2, xmm11
+   238                                  ; call printf
+   239                                  ; pop rax
+   240                                  
+   241                                  
+   242                                  ShowRoot:
+   243                                  ;Calculates the roots of the given variables in quadlibrary.cpp
+   244 00000173 6AFF                    push qword -1
+   245 00000175 6AFE                    push qword -2
+   246 00000177 6AFD                    push qword -3
+   247 00000179 B800000000              mov rax, 0 
+   248 0000017E F2410F10C5              movsd xmm0, xmm13
+   249 00000183 F2410F10CC              movsd xmm1, xmm12
+   250 00000188 F2410F10D3              movsd xmm2, xmm11
+   251 0000018D E8(00000000)            call quadraticCalc
+   252 00000192 F2440F10D0              movsd xmm10, xmm0
+   253 00000197 58                      pop rax
+   254 00000198 58                      pop rax 
+   255 00000199 58                      pop rax
+   256                                  
+   257                                  ; push qword 99
+   258                                  ; mov rax, 1
+   259                                  ; mov rdi, testerFloat
+   260                                  ; movsd xmm0, xmm10
+   261                                  ; call printf
+   262                                  ; pop rax
+   263                                  
+   264                                  ;============= End of section to input two float numbers ==============================================================
+   265                                  
+   266                                  
+   267                                  ;============= Prepare to exit from this program ======================================================================
+   268                                  
+   269                                  ;Display good-bye message (the next block of instructions)
+   270                                  GoodBye:
+   271 0000019A B800000000              mov rax, 0
+   272 0000019F 48BF-                   mov rdi, good_bye
+   272 000001A1 [C700000000000000] 
+   273 000001A9 E8(00000000)            call printf
+   274 000001AE 58                      pop rax                        ;Reverse the push near the beginning of this asm function.
+   275                                  
+   276 000001AF F2410F10C2              movsd xmm0, xmm10
+   277                                  
+   278                                  ;===== Restore original values to integer registers ===================================================================
+   279 000001B4 9D                      popf                                                        ;Restore rflags
+   280 000001B5 5B                      pop rbx                                                     ;Restore rbx
+   281 000001B6 415F                    pop r15                                                     ;Restore r15
+   282 000001B8 415E                    pop r14                                                     ;Restore r14
+   283 000001BA 415D                    pop r13                                                     ;Restore r13
+   284 000001BC 415C                    pop r12                                                     ;Restore r12
+   285 000001BE 415B                    pop r11                                                     ;Restore r11
+   286 000001C0 415A                    pop r10                                                     ;Restore r10
+   287 000001C2 4159                    pop r9                                                      ;Restore r9
+   288 000001C4 4158                    pop r8                                                      ;Restore r8
+   289 000001C6 59                      pop rcx                                                     ;Restore rcx
+   290 000001C7 5A                      pop rdx                                                     ;Restore rdx
+   291 000001C8 5E                      pop rsi                                                     ;Restore rsi
+   292 000001C9 5F                      pop rdi                                                     ;Restore rdi
+   293 000001CA 5D                      pop rbp                                                     ;Restore rbp
+   294                                  
+   295 000001CB C3                      ret
+   296                                  
+   297                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**

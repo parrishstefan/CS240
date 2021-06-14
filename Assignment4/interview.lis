@@ -1,0 +1,315 @@
+     1                                  ; //*****************************************************************************************************************************
+     2                                  ; //Program name: "King of Assembly".  This program demonstrates inputting a string with an embedded white space. This program   *
+     3                                  ; //also passed paramaters back and forth between C++ and assembly files which determine the salary of the user.                *
+     4                                  ; //Copyright (C) 2021 Stefan Parrish.                                                                                          *
+     5                                  ; //                                                                                                                            *
+     6                                  ; //This file is part of the software program "King of Assembly".                                                               *
+     7                                  ; //King of Assembly is free software: you can redistribute it and/or modify it under the terms of the                          *
+     8                                  ; //GNU General Public License version 3 as published by the Free Software Foundation.                                          *
+     9                                  ; //King of Assembly is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied      *
+    10                                  ; //warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.      *
+    11                                  ; //A copy of the GNU General Public License v3 is available here:  <https:;www.gnu.org/licenses/>.                             *
+    12                                  ; //*****************************************************************************************************************************
+    13                                  
+    14                                  
+    15                                  ; //=======1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**
+    16                                  ; //
+    17                                  ; //Author information
+    18                                  ; //  Author name: Stefan Parrish
+    19                                  ; //  Author email: parrishstefan@fullerton.edu
+    20                                  ; //
+    21                                  ; //Program information
+    22                                  ; //  Program name: King of Assembly
+    23                                  ; //  Programming languages: One modules in C++ and one module in X86
+    24                                  ; //  Date program began: 2021-April-25
+    25                                  ; //  Date of last update: 2021-May-11
+    26                                  ; //  Date of reorganization of comments: 2021-May-11
+    27                                  ; //  Files in this program: main.cpp, interview.asm
+    28                                  ; //  Status: Finished.  The program was tested extensively with no errors in Ubuntu20.04.
+    29                                  ; //
+    30                                  ; //Purpose
+    31                                  ; //  Takes input from main.cpp for name and requested salary. It then asks a couple more technical questions and which
+    32                                  ; //  major interviewee has. It then passes the needed information back to main.cpp
+    33                                  ; //
+    34                                  ; //This file
+    35                                  ; //   File name: interview.asm
+    36                                  ; //   Language: assembly
+    37                                  
+    38                                  
+    39                                  ;===== Begin code area ================================================================================================
+    40                                  extern printf
+    41                                  extern scanf
+    42                                  global interview
+    43                                  
+    44                                  
+    45                                  segment .data
+    46                                  
+    47 00000000 48656C6C6F2025732E-     welcome db "Hello %s.  I am Ms Fenster.  The interview will begin now.",10,0
+    47 00000009 20204920616D204D73-
+    47 00000012 2046656E737465722E-
+    47 0000001B 202054686520696E74-
+    47 00000024 657276696577207769-
+    47 0000002D 6C6C20626567696E20-
+    47 00000036 6E6F772E0A00       
+    48 0000003C 576F77212024252E32-     welcome2 db "Wow! $%.2lf  That's a lot of cash.  Who do you think you are, Chris Sawyer (y or n)?",0
+    48 00000045 6C6620205468617427-
+    48 0000004E 732061206C6F74206F-
+    48 00000057 6620636173682E2020-
+    48 00000060 57686F20646F20796F-
+    48 00000069 75207468696E6B2079-
+    48 00000072 6F75206172652C2043-
+    48 0000007B 687269732053617779-
+    48 00000084 6572202879206F7220-
+    48 0000008D 6E293F00           
+    49                                  
+    50 00000091 7900                    yesAnswer db "y",0
+    51                                  
+    52                                  ;Preset salaries for different majors/people
+    53 00000093 0000000080842E41        chrisSawyerSalary dq 1000000.00
+    54 0000009B 48E17A140E7CF540        compSciSalary dq 88000.88
+    55 000000A3 14AE47E17AC09240        philosophySalary dq 1200.12
+    56                                  
+    57 000000AB 416C72696768742E20-     workElectricity db "Alright. Now we will work on your electricity.",10,0
+    57 000000B4 4E6F77207765207769-
+    57 000000BD 6C6C20776F726B206F-
+    57 000000C6 6E20796F757220656C-
+    57 000000CF 656374726963697479-
+    57 000000D8 2E0A00             
+    58 000000DB 506C6561736520656E-     enterOneResistance db "Please enter the resistance of circuit #1 in ohms: ",0
+    58 000000E4 746572207468652072-
+    58 000000ED 6573697374616E6365-
+    58 000000F6 206F66206369726375-
+    58 000000FF 697420233120696E20-
+    58 00000108 6F686D733A2000     
+    59 0000010F 576861742069732074-     enterTwoResistance db "What is the resistance of circuit #2 in ohms: ",0
+    59 00000118 686520726573697374-
+    59 00000121 616E6365206F662063-
+    59 0000012A 697263756974202332-
+    59 00000133 20696E206F686D733A-
+    59 0000013C 2000               
+    60 0000013E 54686520746F74616C-     answerResistance db "The total resistance is %.5lf ohms.",10,0
+    60 00000147 20726573697374616E-
+    60 00000150 636520697320252E35-
+    60 00000159 6C66206F686D732E0A-
+    60 00000162 00                 
+    61 00000163 5765726520796F7520-     questionCS db "Were you a computer science major (y or n)?",0
+    61 0000016C 6120636F6D70757465-
+    61 00000175 7220736369656E6365-
+    61 0000017E 206D616A6F72202879-
+    61 00000187 206F72206E293F00   
+    62                                  
+    63 0000018F 5468616E6B20796F75-     good_bye db "Thank you.  Please follow the exit signs to the front desk.",10,0
+    63 00000198 2E2020506C65617365-
+    63 000001A1 20666F6C6C6F772074-
+    63 000001AA 686520657869742073-
+    63 000001B3 69676E7320746F2074-
+    63 000001BC 68652066726F6E7420-
+    63 000001C5 6465736B2E0A00     
+    64                                  
+    65                                  ;Format for y/n input in string
+    66 000001CC 257300                  one_string_format db "%s",0
+    67                                  ;Format for ohms input in float
+    68 000001CF 256C6600                one_float_format db "%lf",0
+    69                                  
+    70                                  segment .bss  ;Reserved for uninitialized data
+    71                                  
+    72 00000000 <res 00000008>          interview.sawyerAnswer resb 8
+    73 00000008 <res 00000008>          interview.compSciAnswer resb 8
+    74                                  
+    75                                  segment .text ;Reserved for executing instructions.
+    76                                  
+    77                                  interview:
+    78                                  
+    79                                  ;Prolog ===== Insurance for any caller of this assembly module ========================================================
+    80                                  ;Any future program calling this module that the data in the caller's GPRs will not be modified.
+    81 00000000 55                      push rbp
+    82 00000001 4889E5                  mov  rbp,rsp
+    83 00000004 57                      push rdi                                                    ;Backup rdi
+    84 00000005 56                      push rsi                                                    ;Backup rsi
+    85 00000006 52                      push rdx                                                    ;Backup rdx
+    86 00000007 51                      push rcx                                                    ;Backup rcx
+    87 00000008 4150                    push r8                                                     ;Backup r8
+    88 0000000A 4151                    push r9                                                     ;Backup r9
+    89 0000000C 4152                    push r10                                                    ;Backup r10
+    90 0000000E 4153                    push r11                                                    ;Backup r11
+    91 00000010 4154                    push r12                                                    ;Backup r12
+    92 00000012 4155                    push r13                                                    ;Backup r13
+    93 00000014 4156                    push r14                                                    ;Backup r14
+    94 00000016 4157                    push r15                                                    ;Backup r15
+    95 00000018 53                      push rbx                                                    ;Backup rbx
+    96 00000019 9C                      pushf                                                       ;Backup rflags
+    97                                  
+    98                                  ;Registers rax, rip, and rsp are usually not backed up.
+    99 0000001A 6A00                    push qword 0
+   100                                  
+   101 0000001C 4989FF                  mov r15, rdi                     ;r15 is name of user
+   102 0000001F F2440F10D8              movsd xmm11, xmm0                ;xmm11 is annual salary requested
+   103                                  
+   104                                  ;Display a welcome message to the viewer.
+   105 00000024 B800000000              mov rax, 0
+   106 00000029 48BF-                   mov rdi, welcome
+   106 0000002B [0000000000000000] 
+   107 00000033 4C89FE                  mov rsi, r15
+   108 00000036 E8(00000000)            call printf
+   109                                  
+   110                                  
+   111 0000003B 6A00                    push qword 0
+   112 0000003D B801000000              mov rax, 1
+   113 00000042 48BF-                   mov rdi, welcome2
+   113 00000044 [3C00000000000000] 
+   114 0000004C F2410F10C3              movsd xmm0, xmm11
+   115 00000051 E8(00000000)            call printf
+   116 00000056 58                      pop rax
+   117                                  
+   118 00000057 6A00                    push qword 0
+   119 00000059 B800000000              mov rax, 0
+   120 0000005E 48BF-                   mov rdi, one_string_format
+   120 00000060 [CC01000000000000] 
+   121 00000068 48BE-                   mov rsi, interview.sawyerAnswer
+   121 0000006A [0000000000000000] 
+   122 00000072 E8(00000000)            call scanf
+   123 00000077 58                      pop rax
+   124                                  
+   125 00000078 8D3425[00000000]        lea esi, [interview.sawyerAnswer]
+   126 0000007F 8D3C25[91000000]        lea edi, [yesAnswer]
+   127 00000086 B901000000              mov ecx, 1
+   128 0000008B F3A6                    rep cmpsb
+   129 0000008D B804000000              mov eax, 4
+   130 00000092 BB01000000              mov ebx, 1
+   131 00000097 7505                    jne NotEqual
+   132                                  
+   133                                  ;ANSWERS YES
+   134 00000099 E926010000              jmp Sawyer
+   135                                  
+   136                                  ;ANSWERS NO
+   137                                  NotEqual:
+   138                                  
+   139 0000009E 6A00                    push qword 0
+   140 000000A0 B800000000              mov rax, 0
+   141 000000A5 48BF-                   mov rdi, workElectricity
+   141 000000A7 [AB00000000000000] 
+   142 000000AF E8(00000000)            call printf
+   143 000000B4 58                      pop rax
+   144                                  
+   145                                  ;User input for ohm resistance
+   146 000000B5 6A00                    push qword 0
+   147 000000B7 B800000000              mov rax, 0
+   148 000000BC 48BF-                   mov rdi, enterOneResistance
+   148 000000BE [DB00000000000000] 
+   149 000000C6 E8(00000000)            call printf
+   150 000000CB 58                      pop rax
+   151                                  
+   152 000000CC 6A00                    push qword 0
+   153 000000CE B800000000              mov rax, 0
+   154 000000D3 48BF-                   mov rdi, one_float_format
+   154 000000D5 [CF01000000000000] 
+   155 000000DD 4889E6                  mov rsi, rsp
+   156 000000E0 E8(00000000)            call scanf
+   157 000000E5 F2440F103C24            movsd xmm15, [rsp]
+   158 000000EB 58                      pop rax
+   159                                  
+   160 000000EC 6A00                    push qword 0
+   161 000000EE B800000000              mov rax, 0
+   162 000000F3 48BF-                   mov rdi, enterTwoResistance
+   162 000000F5 [0F01000000000000] 
+   163 000000FD E8(00000000)            call printf
+   164 00000102 58                      pop rax
+   165                                  
+   166 00000103 6A00                    push qword 0
+   167 00000105 B800000000              mov rax, 0
+   168 0000010A 48BF-                   mov rdi, one_float_format
+   168 0000010C [CF01000000000000] 
+   169 00000114 4889E6                  mov rsi, rsp
+   170 00000117 E8(00000000)            call scanf
+   171 0000011C F2440F103424            movsd xmm14, [rsp]
+   172 00000122 58                      pop rax
+   173                                  ;End inputs
+   174                                  
+   175                                  ;Calculate total resistance
+   176 00000123 F2450F10EF              movsd xmm13, xmm15              ;xmm13 temp holder
+   177                                  
+   178 00000128 F2450F59EE              mulsd xmm13, xmm14
+   179 0000012D F2450F58FE              addsd xmm15, xmm14
+   180 00000132 F2450F5EEF              divsd xmm13, xmm15
+   181                                  
+   182                                  ;Outputs calculated ohm resistance
+   183 00000137 6A00                    push qword 0
+   184 00000139 B801000000              mov rax, 1
+   185 0000013E 48BF-                   mov rdi, answerResistance
+   185 00000140 [3E01000000000000] 
+   186 00000148 F2410F10C5              movsd xmm0, xmm13
+   187 0000014D E8(00000000)            call printf
+   188 00000152 58                      pop rax
+   189                                  
+   190                                  ;Asks if user is a CS major
+   191 00000153 6A00                    push qword 0
+   192 00000155 B800000000              mov rax, 0
+   193 0000015A 48BF-                   mov rdi, questionCS
+   193 0000015C [6301000000000000] 
+   194 00000164 E8(00000000)            call printf
+   195 00000169 58                      pop rax
+   196                                  
+   197 0000016A 6A00                    push qword 0
+   198 0000016C B800000000              mov rax, 0
+   199 00000171 48BF-                   mov rdi, one_string_format
+   199 00000173 [CC01000000000000] 
+   200 0000017B 48BE-                   mov rsi, interview.compSciAnswer
+   200 0000017D [0800000000000000] 
+   201 00000185 E8(00000000)            call scanf
+   202 0000018A 58                      pop rax
+   203                                  
+   204 0000018B 8D3425[08000000]        lea esi, [interview.compSciAnswer]
+   205 00000192 8D3C25[91000000]        lea edi, [yesAnswer]
+   206 00000199 B901000000              mov ecx, 1
+   207 0000019E F3A6                    rep cmpsb
+   208 000001A0 B804000000              mov eax, 4
+   209 000001A5 BB01000000              mov ebx, 1
+   210 000001AA 750C                    jne NoCompSci
+   211                                  
+   212                                  ;Comp Sci Major
+   213 000001AC F2440F101425-           movsd xmm10, [compSciSalary]
+   213 000001B2 [9B000000]         
+   214 000001B6 EB16                    jmp EndProgram
+   215                                  
+   216                                  ;Philosophy Major
+   217                                  NoCompSci:
+   218 000001B8 F2440F101425-           movsd xmm10, [philosophySalary]
+   218 000001BE [A3000000]         
+   219 000001C2 EB0A                    jmp EndProgram
+   220                                  
+   221                                  ;Name is Chris Sawyer
+   222                                  Sawyer:
+   223 000001C4 F2440F101425-           movsd xmm10, [chrisSawyerSalary]
+   223 000001CA [93000000]         
+   224                                  
+   225                                  ;============= Prepare to exit from this program ======================================================================
+   226                                  EndProgram:
+   227                                  ;Display good-bye message (the next block of instructions)
+   228 000001CE 6A00                    push qword 0
+   229 000001D0 B800000000              mov rax, 0
+   230 000001D5 48BF-                   mov rdi, good_bye
+   230 000001D7 [8F01000000000000] 
+   231 000001DF E8(00000000)            call printf
+   232 000001E4 58                      pop rax                        ;Reverse the push near the beginning of this asm function.
+   233 000001E5 58                      pop rax
+   234 000001E6 F2410F10C2              movsd xmm0, xmm10
+   235                                  ;===== Restore original values to integer registers ===================================================================
+   236 000001EB 9D                      popf                                                        ;Restore rflags
+   237 000001EC 5B                      pop rbx                                                     ;Restore rbx
+   238 000001ED 415F                    pop r15                                                     ;Restore r15
+   239 000001EF 415E                    pop r14                                                     ;Restore r14
+   240 000001F1 415D                    pop r13                                                     ;Restore r13
+   241 000001F3 415C                    pop r12                                                     ;Restore r12
+   242 000001F5 415B                    pop r11                                                     ;Restore r11
+   243 000001F7 415A                    pop r10                                                     ;Restore r10
+   244 000001F9 4159                    pop r9                                                      ;Restore r9
+   245 000001FB 4158                    pop r8                                                      ;Restore r8
+   246 000001FD 59                      pop rcx                                                     ;Restore rcx
+   247 000001FE 5A                      pop rdx                                                     ;Restore rdx
+   248 000001FF 5E                      pop rsi                                                     ;Restore rsi
+   249 00000200 5F                      pop rdi                                                     ;Restore rdi
+   250 00000201 5D                      pop rbp                                                     ;Restore rbp
+   251                                  
+   252 00000202 C3                      ret
+   253                                  
+   254                                  ;========1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2=========3**

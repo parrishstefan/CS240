@@ -1,0 +1,118 @@
+     1                                  ; // Author information
+     2                                  ; //  Author name: Stefan Parrish
+     3                                  ; //  Author email: parrishstefan@fullerton.edu
+     4                                  ; //  ENROLLED IN SECTION 07
+     5                                  ; //  TOOK TEST FROM SECTION 1&5
+     6                                  
+     7                                  extern printf
+     8                                  extern scanf
+     9                                  extern isfloat
+    10                                  extern stringtofloat
+    11                                  
+    12                                  global fill                       ; Makes function callable from other linked files.
+    13                                  
+    14                                  section .data
+    15 00000000 257300                      inputStr       db "%s", 0
+    16 00000003 256C660A00                  outputDbl      db "%lf", 10, 0
+    17 00000008 5B25642C2025645D3A-         outputArray    db "[%d, %d]: %lf", 10, 0
+    17 00000011 20256C660A00       
+    18                                  
+    19                                  section .bss
+    20                                  
+    21 00000000 <res 00000020>          fill.float resb 32
+    22                                  
+    23                                  section .text
+    24                                  
+    25                                  fill:
+    26                                  
+    27                                  ; Back up all registers and set stack pointer to base pointer
+    28 00000000 55                      push rbp
+    29 00000001 4889E5                  mov rbp, rsp
+    30 00000004 57                      push rdi
+    31 00000005 56                      push rsi
+    32 00000006 52                      push rdx
+    33 00000007 51                      push rcx
+    34 00000008 4150                    push r8
+    35 0000000A 4151                    push r9
+    36 0000000C 4152                    push r10
+    37 0000000E 4153                    push r11
+    38 00000010 4154                    push r12
+    39 00000012 4155                    push r13
+    40 00000014 4156                    push r14
+    41 00000016 4157                    push r15
+    42 00000018 53                      push rbx
+    43                                  
+    44 00000019 6AFF                    push qword -1                           ; Extra push to create even number of pushes
+    45                                  
+    46                                  ;-----------------------------INITIALIZE PARAMETERS-----------------------------------------
+    47 0000001B 4989FF                  mov r15, rdi                      ; Address of array saved to r15.
+    48 0000001E 4989F6                  mov r14, rsi                      ; Max number of elements allowed in array.
+    49 00000021 41BD00000000            mov r13, 0                        ; Counter to iterate through array.
+    50                                  
+    51                                  ;---------------------------------START OF LOOP---------------------------------------------
+    52                                  begin_loop:
+    53                                  
+    54                                  ; Scanf function called to take user input.
+    55 00000027 6A63                    push qword 99
+    56 00000029 B800000000              mov rax, 0
+    57 0000002E 48BF-                   mov rdi, inputStr
+    57 00000030 [0000000000000000] 
+    58 00000038 48BE-                   mov rsi, fill.float
+    58 0000003A [0000000000000000] 
+    59 00000042 E8(00000000)            call scanf
+    60 00000047 4158                    pop r8
+    61                                  
+    62                                  ; Test if Control + D is entered to finish inputting into array.
+    63 00000049 4898                    cdqe
+    64 0000004B 4883F8FF                cmp rax, -1                          
+    65 0000004F 7444                    je end_loop                             ; Exit loop if control + D is pressed.
+    66                                  
+    67 00000051 B800000000              mov rax, 0
+    68 00000056 48BF-                   mov rdi, fill.float
+    68 00000058 [0000000000000000] 
+    69 00000060 E8(00000000)            call isfloat
+    70 00000065 4989C4                  mov r12, rax
+    71                                  
+    72                                  ;INVALID ENTRY
+    73 00000068 4983FC00                cmp r12, 0
+    74 0000006C 74B9                    je begin_loop
+    75                                  ;
+    76                                  
+    77 0000006E B800000000              mov rax, 0
+    78 00000073 48BF-                   mov rdi, fill.float
+    78 00000075 [0000000000000000] 
+    79 0000007D E8(00000000)            call stringtofloat
+    80 00000082 664C0F6ED8              movq xmm11, rax
+    81                                  
+    82                                  ;--------------------------------COPY INTO ARRAY IF VALID INPUT--------------------------------------------
+    83 00000087 F2470F111CEF            movsd [r15 + 8 * r13], xmm11            ; Copy user input into array at index r13.
+    84 0000008D 49FFC5                  inc r13                                 ; Increment array index.
+    85                                  
+    86                                  ;-----------------------------ARRAY CAPACITY TEST-------------------------------------------
+    87                                  ; Test to see if max array capacity has been reached.
+    88 00000090 4D39F5                  cmp r13, r14
+    89 00000093 7592                    jne begin_loop                          ; Loop until R13=R14.
+    90                                  
+    91                                  ;---------------------------------END OF LOOP-----------------------------------------------
+    92                                  end_loop:
+    93                                  
+    94                                  ; Restore all backed up registers to their original state.
+    95 00000095 58                      pop rax                                 ; Remove extra push of -1 from stack.
+    96 00000096 4C89E8                  mov rax, r13                            ; Copy # of elements in r13 to rax.
+    97                                  
+    98 00000099 5B                      pop rbx                                                     
+    99 0000009A 415F                    pop r15                                                     
+   100 0000009C 415E                    pop r14                                                      
+   101 0000009E 415D                    pop r13                                                      
+   102 000000A0 415C                    pop r12                                                      
+   103 000000A2 415B                    pop r11                                                     
+   104 000000A4 415A                    pop r10                                                     
+   105 000000A6 4159                    pop r9                                                      
+   106 000000A8 4158                    pop r8                                                      
+   107 000000AA 59                      pop rcx                                                     
+   108 000000AB 5A                      pop rdx                                                     
+   109 000000AC 5E                      pop rsi                                                     
+   110 000000AD 5F                      pop rdi                                                     
+   111 000000AE 5D                      pop rbp
+   112                                  
+   113 000000AF C3                      ret

@@ -1,0 +1,169 @@
+2021 Spring CPSC 240 Summary
+
+Qualities of professional source files
+   License (short form) appears in every file of source code.
+   License (long form) in a separate file commonly included with the set of all source files.
+
+The issue of open source licenses for software.
+   The recommended open source license
+   The 4 liberties guaranteed to users by an open source license
+   The N obligations incurred by users of open source software:
+       =>Leave the contact information of the previous developers in place in the source files.
+       =>Keep the same license on future derived products.
+    The distinction between GPL and LGPL
+
+Famous people
+        Hooper, Lovelace, Babbage, Sawyer, Stallman,
+
+Components of x86 microprocessor: 2 of these we studied and 2 we did not.
+
+Properties of twos complement integers stored in registers of size n bits.
+
+Properties of IEEE754 floating point numbers
+   Know the two types: 64-bits and 32-bits.
+
+Extenders: cdqe, cqo
+Shifters: shl, shr
+Converters: cvtsi2sd, cvtsd2si [64-bits]
+            cvtsi2ss, cvtss2si [32-bits]
+Rounding of float numbers
+  roundsd xmm4, xmm7, [1|1|2|3]
+     0 = traditional rounding where a tie goes to the even number
+     1 = round down toward negative infinity
+     2 = round up toward positive infinity
+     3 = round toward zero
+
+Integer arithmetic
+   Add and subtract usually present no problems
+   How to multiply two signed (or unsigned) integers.
+   How to divide two signed (or unsigned) integers
+
+Operations on SSE
+   movsd   movpd
+   addsd   addpd
+   subsd   suppd
+   mulsd   mulpd
+   sqrtsd  sqrtpd
+   orsd    orpd
+   andsd   andpd
+   -----   xorpd
+   
+Converters: cvtsisd [from long integer to IEEE754 64-bit double]
+cvtdi2pd  <<< verify this
+
+How to use masks to modify part of a register -- either SSE or GPR register.
+
+
+Processor clock
+   Where is frequencly found?
+   How to extract the clock's count of tics.
+   Samples of high, medium, and low frequencies.
+   Variable frequency processors.
+   Frequency of the 8086 processor used in the first IBM PC.
+   Instruction that momentarily pauses all processing (all cores).
+
+Endianess
+   How to verify the type of endian in a given computer.
+   How to convert between big and little endian numbers.
+
+Memory and the issue of alignment.
+   The meaning of "on the boundary"
+   The importance of knowing about the 16-byte boundary
+   Certain operations can only happen on 16-byte boundaries.
+       Starting a new AR is an example of an action that can only occur on a 16-bit boundary
+   FYI: in another context (not studied by us) the 64-byte boundary is very important.
+
+Technique of measuring execution time between point A in the code and point B somewhere else in the code.
+   Caveat about core influence on the computed result.
+   How to extract processor frequency from the cpu.
+
+Parameter passing
+   The standard order of integer parameter passing.
+   What happens if there is a need to pass more integer parameters?
+   The standard order of floating point parameter passing.
+   When and why we use "extern "C"".
+
+ATT syntax
+   One language: two forms of recording it.
+   ATT operates left to right
+   Intex operates right to left
+   S parameter translates from C++ to X86 with ATT syntax
+   
+Position Independent Executable (PIE)
+   This is some thing we should all know, but I don't understand it enoguh to explain it☹️.
+
+GDB = Gnu Debugger
+   Practice questions will be distributed in separate documents.
+
+Pure assembly (no calls to library functions)
+   How I/O is performed
+   Uses native linker that comes with the assembler: for example, Nasm provides ld.
+
+Inline assembly
+   g++ and gcc are both capable of assembling assembly code
+   The assembly language insructions are written into the ordinary C++ code with suitable identifiers: asm{   }
+   The enclosing parent code and the asm code are compiled jointly.
+   No need to install nasm; no need to build functions in asm and link them into the main project.
+
+Two uses of asm: device drivers and speed
+   What is a device driver, who creates one of those, is a programming language involved, how does the customer receive one
+   What is the 80-20 rule.  What is a justifiable reason for embedding inline assembly in a larger program?
+
+Fast operations: xor for zero out, shift for multiply by a power of 2, shift for divide by a power of 2.
+
+List file: code for each instruction in a program.  [The professor does not know how to make a list from C++ source file.]
+
+
+
+
+============ Textbook =========================================
+Subjects from Jorgensen covered in this course
+
+Numbers: integers & floats: Ch 3
+
+Form of a program: Ch 4.  We did all of this.
+
+Tool chain: ch 5
+   How to compile, link, execute in the GNU software system.
+   Preferred tool for hex editing: ghex
+   How to compile both C and C++ in the GNU tool chain.
+   How to specify the language standard in a compile statement.
+   Which is the most recent standard for C language, and for C++ language.
+
+GDB: Chapter 6.  
+   The GDB material is mixed together with another tool: DDD.
+   You'll need to extrac out the GDB material
+
+All the X86 instructions: Ch7
+   Operands are classified: register, memory, immediate
+   Operands are classified: source, destination
+   Example of using "dword", p.71
+   Table of instructions that widen data.  cdqe is on the list
+   imul expands rax --> rdx:rax   Ch 7.5.3
+   idiv shrinks  rdx:rax --> rax plus rdx = remainder  Ch 7.5.4
+
+The process stack also called the system stack.   Ch 9
+
+Linking of functions, parameter passing conventions.   Ch 12
+
+System services.  Ch 13
+   We had one lecture on this subject.  I called it pure assembly
+   The author shows that in pure assembly you can call a function "printstring" that resides in the same file as the caller.
+   Table of passing parameters to the kernel via "syscall": page 192
+   Chapter 13 contains lots of information on syscall -- much more than we did in one lecture.
+
+How to build of program composed of multiple source files: Ch 14
+   We did this all semester
+
+Instructions acting on xmm registers: Ch 18
+   We did a lot of this.  Be aware that the author includes instruction we did not use such as movss.
+   The convert instructions: pp 260-261
+   The jumb instructions: pp 271-272
+   How to pass floating point parameters, pp274-275
+
+
+We omitted: Chapters 15-17, 19-20.
+=====================================================================================
+
+
+Date of last edit: 2021 April 28

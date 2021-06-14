@@ -1,0 +1,111 @@
+     1                                  ; // Author information
+     2                                  ; //  Author name: Stefan Parrish
+     3                                  ; //  Author email: parrishstefan@fullerton.edu
+     4                                  ; //  ENROLLED IN SECTION 07
+     5                                  ; //  TOOK TEST FROM SECTION 1&5
+     6                                  
+     7                                  initial_value equ 0
+     8                                  initial_division equ 1
+     9                                  
+    10                                  extern printf
+    11                                  global harmonic                             ; Makes function callable from other linked files.
+    12                                  
+    13                                  section .data  
+    14 00000000 546865206861726D6F-     outputMean   db "The harmonic mean of these numbers is %lf.",10,0
+    14 00000009 6E6963206D65616E20-
+    14 00000012 6F6620746865736520-
+    14 0000001B 6E756D626572732069-
+    14 00000024 7320256C662E0A00   
+    15                                  ;returnDriver db "The harmonic mean will be returned to the driver.",10,0
+    16                                  
+    17                                  section .bss
+    18                                  
+    19                                  section .text
+    20                                  
+    21                                  harmonic:
+    22                                  
+    23                                  ; Back up all registers to stack and set stack pointer to base pointer
+    24 00000000 55                      push rbp
+    25 00000001 4889E5                  mov rbp, rsp
+    26 00000004 57                      push rdi
+    27 00000005 56                      push rsi
+    28 00000006 52                      push rdx
+    29 00000007 51                      push rcx
+    30 00000008 4150                    push r8
+    31 0000000A 4151                    push r9
+    32 0000000C 4152                    push r10
+    33 0000000E 4153                    push r11
+    34 00000010 4154                    push r12
+    35 00000012 4155                    push r13
+    36 00000014 4156                    push r14
+    37 00000016 4157                    push r15
+    38 00000018 53                      push rbx
+    39 00000019 9C                      pushf
+    40                                  
+    41 0000001A 6AFF                    push qword -1                           ; Extra push onto stack to make even # of pushes.
+    42                                  
+    43 0000001C 4989FF                  mov r15, rdi                            ; Copies array that was passed to r15.
+    44 0000001F 4989F6                  mov r14, rsi                            ; Copies number of elements in the array to r14.
+    45 00000022 41BD00000000            mov r13, 0                              ; Sum register to add elements of array to.
+    46 00000028 41BC00000000            mov r12, 0                              ; Counter to to iterate through array.
+    47 0000002E 41BB01000000            mov r11, initial_division
+    48 00000034 F24D0F2ADB              cvtsi2sd xmm11, r11
+    49 00000039 F2450F10D3              movsd xmm10, xmm11
+    50                                  
+    51 0000003E 41BA00000000            mov r10, initial_value
+    52 00000044 F24D0F2ACA              cvtsi2sd xmm9, r10
+    53                                  
+    54                                  ;-----------------------------------START LOOP----------------------------------------------
+    55                                  begin_loop:
+    56                                  
+    57                                  ; Compares the counter (r12) to the number of elements in the array (r14).
+    58 00000049 4D39F4                  cmp r12, r14                        
+    59 0000004C 7D15                    jge outofloop
+    60                                  
+    61                                  ;--------------------------------CALCULATES HARMONIC MEAN-------------------------------------------
+    62                                  
+    63 0000004E F2450F10DA              movsd xmm11, xmm10
+    64 00000053 F2470F5E1CE7            divsd xmm11, [r15 + 8 * r12]
+    65 00000059 F2450F58FB              addsd xmm15, xmm11
+    66                                  
+    67 0000005E 49FFC4                  inc r12
+    68                                  
+    69                                  ; Restarts loop
+    70 00000061 EBE6                    jmp begin_loop          
+    71                                  
+    72                                  ;----------------------------------END OF LOOP----------------------------------------------
+    73                                  outofloop:
+    74                                  
+    75 00000063 F24D0F2AF6              cvtsi2sd xmm14, r14
+    76 00000068 F2450F5EF7              divsd xmm14, xmm15
+    77                                  
+    78 0000006D 6A00                    push qword 0
+    79 0000006F B801000000              mov rax, 1
+    80 00000074 48BF-                   mov rdi, outputMean
+    80 00000076 [0000000000000000] 
+    81 0000007E F2410F10C6              movsd xmm0, xmm14
+    82 00000083 E8(00000000)            call printf
+    83 00000088 58                      pop rax
+    84                                  
+    85                                  
+    86 00000089 F2410F10C6              movsd xmm0, xmm14
+    87                                  
+    88                                  ; Restores all backed up registers to their original state.
+    89 0000008E 58                      pop rax                                ; Remove extra push of -1 from stack.
+    90 0000008F 9D                      popf                                                       
+    91 00000090 5B                      pop rbx                                                     
+    92 00000091 415F                    pop r15                                                     
+    93 00000093 415E                    pop r14                                                      
+    94 00000095 415D                    pop r13                                                      
+    95 00000097 415C                    pop r12                                                      
+    96 00000099 415B                    pop r11                                                     
+    97 0000009B 415A                    pop r10                                                     
+    98 0000009D 4159                    pop r9                                                      
+    99 0000009F 4158                    pop r8                                                      
+   100 000000A1 59                      pop rcx                                                     
+   101 000000A2 5A                      pop rdx                                                     
+   102 000000A3 5E                      pop rsi                                                     
+   103 000000A4 5F                      pop rdi                                                     
+   104 000000A5 5D                      pop rbp
+   105                                  
+   106 000000A6 C3                      ret
